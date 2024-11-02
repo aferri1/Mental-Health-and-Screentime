@@ -8,86 +8,8 @@ Created on Sun Mar  3 18:03:29 2024
 import pandas as pd
 import numpy as np
 
-import re
 
-
-
-df = pd.read_csv('/Users/trekz1/Documents/Applied Data Sci/Coursework/screenTime/maps-synthetic-data-v1.1.csv')
-
-yes_no_columns = [column for column in df.columns if df[column].isin(['Yes', 'No']).any()]  # find all columns with yes/no
-
-def convert_yes_no(value):   # convert Yes and No values to binary indicators
-    if value == 'Yes':
-        return 1
-    elif value == 'No':
-        return 0
-    else:
-        return value
-
-df1 = df.applymap(convert_yes_no)  # apply function to df
-
-
-
-def convert_to_interval(value):  # convert all interval descriptions to numerical values
-    if value == 'Less than 1 hour':
-        return pd.Interval(left=0, right=1, closed='left')
-    elif value == '< 1 hour':
-        return pd.Interval(left=0, right=1, closed='left')
-    elif value == '1-2 hours':
-        return pd.Interval(left=1, right=3, closed='right')
-    elif value == '3 or more hours':
-        return pd.Interval(left=3, right=float('inf'), closed='right')
-    elif value == 'Not at all':
-        return pd.Interval(left=0, right=0, closed='both')
-    elif value == '1 or more hours':
-        return pd.Interval(left=1, right=float('inf'), closed='right')
-    elif value == 'Less than 3 hours':
-        return pd.Interval(left=0, right=3, closed='left') 
-    else:
-        return value  # Return the value unchanged if it does not match any pattern
-
-# df1 = df1.applymap(convert_to_interval)
-    
-'''
-Check for other < or > signs:
-'''   
-# Pattern to match strings that contain '<' or '>' optionally followed by spaces, and then any number
-pattern = re.compile(r'[<>]\s*\d+')
-
-# Create a dictionary to store unique matches for each column index
-unique_matches_in_columns = {}
-
-# Iterate over each column in the DataFrame
-for col_index, column in enumerate(df.columns):
-    # Only process columns with data type 'object' (string)
-    if df[column].dtype == 'object':
-        # Initialize a set to store unique matches for the current column
-        matches_set = set()
-        # Apply the pattern search row-wise and collect all unique matches found in each column
-        df[column].apply(lambda x: matches_set.update(re.findall(pattern, str(x))))
-        
-        # If any matches were found, store them for the current column
-        if matches_set:
-            unique_matches_in_columns[col_index] = matches_set
-
-# Display the results
-for col_index, matches in unique_matches_in_columns.items():
-    print(f"Column {col_index}: contains unique strings like {', '.join(matches)}")
-
-
-# Columns identified as containing interval-like descriptions
-interval_columns = ['talk_phon_wend', 'text_wend', 'talk_mob_wend', 'comp_wend', 'musi_wend',
-    'read_wend', 'work_wend', 'alon_wend', 'draw_wend', 'play_wend',
-    'tv_wend', 'out_win_wend', 'out_sum_wend', 'tran_wend', 'talk_phon_week',
-    'text_week', 'talk_mob_week', 'comp_week', 'musi_week', 'read_week',
-    'work_week', 'alon_week', 'draw_week', 'play_week', 'tv_week',
-    'out_win_week', 'out_sum_week', 'tran_week', 'phone_14_wend', 'phone_14_week']
-
-for column in interval_columns:  #  apply interval function to all columns that need it
-    df1[column] = df1[column].apply(convert_to_interval)  
-
-percentage_nans = df1.isna().mean() * 100
-
+df = pd.read_csv('/Users/trekz1/Documents/Applied-Data-Sci/Coursework/screenTime/maps-synthetic-data-v1.1.csv')
 
 
 def transform_yes_no(df, column_indices):
@@ -625,7 +547,7 @@ def transform_nan_to_0(df, column_indices):
 
 def main():
     # Load the dataset
-    df = pd.read_csv('/Users/trekz1/Documents/Applied Data Sci/Coursework/screenTime/maps-synthetic-data-v1.1.csv')
+    df = pd.read_csv('/Users/trekz1/Documents/Applied-Data-Sci/Coursework/screenTime/maps-synthetic-data-v1.1.csv')
     
     nan_to_0_indices = [10,11,77,78]
     
